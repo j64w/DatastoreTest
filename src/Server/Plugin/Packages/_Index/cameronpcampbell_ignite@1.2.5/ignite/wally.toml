@@ -1,0 +1,14 @@
+[package]
+name = "cameronpcampbell/ignite"
+description="⚡ A beautiful component system for Roblox plugin development."
+version = "1.2.5"
+registry = "https://github.com/UpliftGames/wally-index"
+realm = "shared"
+license = "MIT"
+authors=[ "Cameron Campbell" ]
+exclude=[ "**" ]
+include=[ "PackageLinks", "PackageLinks/**", "src", "src/**", "default.project.json", "wally.toml", "wally.lock", "default.project.json", "ignite.project.json", "LICENSE.md" ]
+
+[dependencies]
+Fusion = "elttob/fusion@0.3.0"
+Highlighter = "boatbomber/highlighter@0.8.3"

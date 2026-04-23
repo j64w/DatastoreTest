@@ -1,59 +1,45 @@
--- RetryEngine.lua
--- Exponential backoff retry wrapper.
--- Returns a Promise that resolves with the result or rejects with the last error.
-
-local Packages = game:GetService("ReplicatedStorage"):WaitForChild("Packages")
-local Promise  = require(Packages.Promise)
-local Utils    = require(script.Parent.Utils)
-
 local RetryEngine = {}
 
-local MAX_ATTEMPTS = 5
-local BASE_DELAY   = 1
-local MAX_DELAY    = 30
-local JITTER_MAX   = 0.5
+local CONFIG = {
+    MaxRetries = 5,
+    BaseDelay = 1
+}
 
--- ─────────────────────────────────────────────
---  Retry(fn, label) → Promise
---
---  fn    — zero-arg function wrapping the DS call
---  label — string for logging
--- ─────────────────────────────────────────────
-function RetryEngine.Retry(fn, label)
-	label = label or "DataStore"
+local function isRetryable(err)
+    if typeof(err) ~= "string" then
+        return false
+    end
 
-	return Promise.new(function(resolve, reject)
-		local lastError
+    err = string.lower(err)
 
-		for attempt = 1, MAX_ATTEMPTS do
-			local ok, result = pcall(fn)
+    if string.find(err, "throttle") then return true end
+    if string.find(err, "timeout") then return true end
+    if string.find(err, "locked") then return true end
+    if string.find(err, "queue") then return true end
 
-			if ok then
-				return resolve(result)
-			end
+    return false
+end
 
-			lastError = result
-			local isRetryable = Utils.IsRetryableError(tostring(result))
+function RetryEngine.Run(callback)
+    local attempts = 0
 
-			warn(("[DataLib] %s — attempt %d/%d failed: %s"):format(
-				label, attempt, MAX_ATTEMPTS, tostring(result)
-			))
+    while attempts < CONFIG.MaxRetries do
+        attempts += 1
 
-			if not isRetryable then
-				warn(("[DataLib] %s — fatal error, aborting."):format(label))
-				return reject(result)
-			end
+        local success, result = pcall(callback)
 
-			if attempt < MAX_ATTEMPTS then
-				local delay = math.min(BASE_DELAY * (2 ^ (attempt - 1)), MAX_DELAY)
-				delay = delay + math.random() * JITTER_MAX
-				Promise.delay(delay):await()
-			end
-		end
+        if success then
+            return result
+        end
 
-		warn(("[DataLib] %s — all %d attempts exhausted."):format(label, MAX_ATTEMPTS))
-		reject(lastError)
-	end)
+        if not isRetryable(result) then
+            return nil, result
+        end
+
+        task.wait(CONFIG.BaseDelay * (2 ^ (attempts - 1)))
+    end
+
+    return nil, "Max retries reached"
 end
 
 return RetryEngine
