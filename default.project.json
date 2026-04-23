@@ -1,0 +1,26 @@
+{
+  "name": "DataLib",
+  "tree": {
+    "$className": "DataModel",
+
+    "ServerScriptService": {
+      "$className": "ServerScriptService",
+
+      "DataLib": {
+        "$path": "src/DataLib"
+      },
+
+      "Server": {
+        "$path": "src/Server"
+      }
+    },
+
+    "ReplicatedStorage": {
+      "$className": "ReplicatedStorage",
+
+      "Packages": {
+        "$path": "Packages"
+      }
+    }
+  }
+}
