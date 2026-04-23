@@ -1,38 +1,61 @@
+local RunService = game:GetService("RunService")
+
 local DataBridge = {}
 
-local SessionManager = require(game.ServerScriptService.DataLib.SessionManager)
+local isPlay = RunService:IsRunning()
 
-function DataBridge.GetSessions()
-    local result = {}
+local Data
 
-    for userId, session in pairs(SessionManager._debug_getSessions()) do
-        table.insert(result, {
-            userId = userId,
-            data = session.Data,
-            delta = session._delta,
-            dirty = session._dirty
-        })
+if isPlay then
+    local ReplicatedStorage = game:GetService("ReplicatedStorage")
+    local remote = ReplicatedStorage:WaitForChild("DataLib_Debug")
+
+    function DataBridge.GetSessions()
+        return remote:InvokeServer("getSessions")
     end
 
-    return result
-end
-
-function DataBridge.GetMetrics()
-    return SessionManager:GetMetrics()
-end
-
-function DataBridge.ForceSave(userId)
-    local s = SessionManager._debug_getSessions()[userId]
-    if s then
-        s:Save()
+    function DataBridge.GetMetrics()
+        return remote:InvokeServer("getMetrics")
     end
-end
 
-function DataBridge.Release(userId)
-    local s = SessionManager._debug_getSessions()[userId]
-    if s then
-        s:Release()
+    function DataBridge.ForceSave(userId)
+        remote:InvokeServer("save", userId)
     end
+
+    function DataBridge.Release(userId)
+        remote:InvokeServer("release", userId)
+    end
+
+else
+    Data = require(script.Parent.Parent.Mock.MockDataLib)
+
+    function DataBridge.GetSessions()
+        local result = {}
+
+        for userId, session in pairs(Data:_debug_getSessions()) do
+            result[userId] = {
+                data = session.Data,
+                dirty = session._dirty
+            }
+        end
+
+        return result
+    end
+
+    function DataBridge.GetMetrics()
+        return Data:GetMetrics()
+    end
+
+    function DataBridge.ForceSave(userId)
+        local s = Data:_debug_getSessions()[userId]
+        if s then s:Save() end
+    end
+
+    function DataBridge.Release(userId)
+        local s = Data:_debug_getSessions()[userId]
+        if s then s:Release() end
+    end
+
 end
 
 return DataBridge

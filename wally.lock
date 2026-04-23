@@ -8,6 +8,11 @@ version = "0.8.3"
 dependencies = []
 
 [[package]]
+name = "boatbomber/highlighter"
+version = "0.9.0"
+dependencies = []
+
+[[package]]
 name = "cameronpcampbell/ignite"
 version = "1.2.5"
 dependencies = [["Fusion", "elttob/fusion@0.3.0"], ["Highlighter", "boatbomber/highlighter@0.8.3"]]
@@ -40,4 +45,4 @@ dependencies = []
 [[package]]
 name = "zero/datastore"
 version = "0.1.0"
-dependencies = [["Ignite", "cameronpcampbell/ignite@1.2.5"], ["Promise", "evaera/promise@4.0.0"], ["Signal", "sleitnick/signal@2.0.3"], ["T", "osyrisrblx/t@3.1.1"], ["Trove", "sleitnick/trove@1.8.0"]]
+dependencies = [["Ignite", "cameronpcampbell/ignite@1.2.5"], ["Promise", "evaera/promise@4.0.0"], ["Signal", "sleitnick/signal@2.0.3"], ["T", "osyrisrblx/t@3.1.1"], ["Trove", "sleitnick/trove@1.8.0"], ["fusion", "elttob/fusion@0.3.0"], ["highlighter", "boatbomber/highlighter@0.9.0"]]
